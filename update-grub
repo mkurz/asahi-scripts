@@ -42,7 +42,7 @@ echo "UUID: $uuid"
 echo "Partition: $part"
 echo "Relative path: $grub_path"
 
-cat > /tmp/grub-core.cfg <<EOF
+cat >/tmp/grub-core.cfg <<EOF
 search.fs_uuid $uuid root $part
 set prefix=(\$root)'$grub_path'
 EOF
@@ -56,10 +56,15 @@ cp -r /usr/lib/grub/arm64-efi "$GRUB_DIR"
 rm -f "$GRUB_DIR"/arm64-efi/*.module
 mkdir -p "$GRUB_DIR"/{fonts,locale}
 cp /usr/share/grub/unicode.pf2 "$GRUB_DIR"/fonts
+
+# turn on nullglob to avoid errors if no translations are found
+shopt -s nullglob
 for i in /usr/share/locale/*/LC_MESSAGES/grub.mo; do
     lc="$(echo "$i" | cut -d/ -f5)"
     cp "$i" "$GRUB_DIR"/locale/"$lc".mo
 done
+# disable nullglob again to avoid unexpected behavior later
+shopt -u nullglob
 
 [[ $MODULES != *$fs* ]] && MODULES="$MODULES $fs"
 echo "Core image modules: $MODULES"
