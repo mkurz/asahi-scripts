@@ -3,7 +3,7 @@
 
 set -e
 
-root_dev=$(findmnt -n -o SOURCE /)
+root_dev=$(findmnt -n -o SOURCE / | sed 's/\[.*\]$//')
 efi_dev=$(findmnt -n -o SOURCE /boot/efi)
 root_fstype=$(findmnt -n -o FSTYPE /)
 
@@ -14,7 +14,7 @@ if [ -e "$root_dev" ]; then
             tune2fs -U random "$root_dev"
             ;;
         btrfs)
-            btrfstune -f -u "$root_dev"
+            echo "Warning: btrfs UUID randomization not supported while mounted, skipping"
             ;;
         *)
             echo "Warning: unsupported filesystem type '$root_fstype', skipping UUID randomization"
@@ -41,6 +41,7 @@ if [ -e "$efi_dev" ] &&
 fi
 
 if [ ! -z "$root_uuid" ] && [ ! -z "$efi_uuid" ]; then
+    # Regenerate fstab with current UUIDs (root may be unchanged for btrfs)
     echo "Regenerating /etc/fstab..."
     if [ "$root_fstype" = "btrfs" ]; then
         tee /etc/fstab <<EOF
