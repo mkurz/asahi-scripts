@@ -10,15 +10,15 @@ root_fstype=$(findmnt -n -o FSTYPE /)
 if [ -e "$root_dev" ]; then
     echo "Randomizing root filesystem UUID..."
     case "$root_fstype" in
-        ext4)
-            tune2fs -U random "$root_dev"
-            ;;
-        btrfs)
-            echo "Warning: btrfs UUID randomization not supported while mounted, skipping"
-            ;;
-        *)
-            echo "Warning: unsupported filesystem type '$root_fstype', skipping UUID randomization"
-            ;;
+    ext4)
+        tune2fs -U random "$root_dev"
+        ;;
+    btrfs)
+        echo "Warning: btrfs UUID randomization not supported while mounted, skipping"
+        ;;
+    *)
+        echo "Warning: unsupported filesystem type '$root_fstype', skipping UUID randomization"
+        ;;
     esac
 
     root_uuid="$(blkid -c /dev/null "$root_dev" -o export | grep '^UUID=')"
@@ -63,5 +63,5 @@ update-grub
 echo
 echo "Initializing Pacman keyring..."
 pacman-key --init
-pacman-key --populate archlinuxarm asahilinux
+pacman-key --populate archlinuxarm asahi-alarm
 echo
